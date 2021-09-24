@@ -1,8 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { CreateUserService } from './createUser.service';
-import { UpdateUserService } from './updateUser.service';
-import { DeleteUserService } from './deleteUser.service';
-import { GetUserService } from './getUser.service';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { User } from '../infra/typeorm/entities/user.entity';
 import {
   CreateUserDTO,
@@ -10,36 +10,50 @@ import {
   UpdateUserDTO,
   UserTokenDTO,
 } from '../Dto';
-import { IUserService } from '../interfaces';
+import { IUserRepository, IUserService } from '../interfaces';
 
 @Injectable()
 export class UserService implements IUserService {
-  constructor(
-    @Inject('CreateUserService')
-    private readonly createUserService: CreateUserService,
-    @Inject('GetUserService')
-    private readonly getUserService: GetUserService,
-    @Inject('UpdateUserService')
-    private readonly updateUserService: UpdateUserService,
-    @Inject('DeleteUserService')
-    private readonly deleteUserService: DeleteUserService,
-  ) {}
-  createUser(data: CreateUserDTO): Promise<User> {
-    return this.createUserService.execute(data);
+  constructor(private readonly userRepository: IUserRepository) {}
+  async createUser({ email, name, password }: CreateUserDTO): Promise<User> {
+    return this.userRepository.create(email, name, password);
   }
-  getUser(
+  async getUser(
     data: { id?: string; email?: string },
     userTokenData?: UserTokenDTO,
   ): Promise<User> {
-    return this.getUserService.execute(data, userTokenData);
+    const queryData = userTokenData
+      ? { id: userTokenData.id, email: userTokenData.email }
+      : data;
+
+    return this.userRepository.findOne(queryData);
   }
-  updateUser(
+  async updateUser(
     updateUserData: UpdateUserDTO,
     userTokenData: UserTokenDTO,
   ): Promise<string> {
-    return this.updateUserService.execute(updateUserData, userTokenData);
+    if (updateUserData.id !== userTokenData.id) {
+      throw new UnauthorizedException('Unauthorized user');
+    }
+    const user = await this.userRepository.findOne({ id: userTokenData.id });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const data = Object.assign(user, updateUserData);
+
+    await this.userRepository.update(data);
+    return 'Usuário atualizado';
   }
-  deleteUser(data: DeleteUserDTO): Promise<boolean> {
-    return this.deleteUserService.execute(data);
+  async deleteUser(data: DeleteUserDTO): Promise<boolean> {
+    const user = await this.userRepository.findOne(data);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const deleteResult = await this.userRepository.delete(data.id);
+    return deleteResult.affected > 0;
   }
 }

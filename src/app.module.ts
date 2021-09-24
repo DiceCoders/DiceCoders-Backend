@@ -1,3 +1,4 @@
+import { getConnectionOptions } from 'typeorm';
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -8,7 +9,12 @@ import { UserModule } from '@modules/user/user.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: `.env` }),
-    TypeOrmModule.forRoot(),
+    TypeOrmModule.forRootAsync({
+      useFactory: async () =>
+        Object.assign(await getConnectionOptions(), {
+          autoLoadEntities: true,
+        }),
+    }),
     GraphQLModule.forRoot({
       autoSchemaFile: 'schema.gql',
     }),

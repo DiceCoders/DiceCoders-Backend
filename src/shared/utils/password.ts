@@ -1,10 +1,14 @@
-import { compareSync, genSalt, hashSync } from 'bcrypt';
+import { compareSync, genSaltSync, hashSync } from 'bcrypt';
 
-export const generatePassword = async (password: string) => {
-  const salt = await genSalt(parseFloat(process.env.SALT));
-  const newPassword = hashSync(password, salt);
-  return newPassword;
+export const hashPasswordTransform = {
+  to(password: string): string {
+    const salt = genSaltSync(parseFloat(process.env.SALT));
+    const newPassword = hashSync(password, salt);
+    return newPassword;
+  },
+  from(hash: string): string {
+    return hash;
+  },
 };
-
 export const comparePassword = (password: string, encryptedPassword: string) =>
   compareSync(password, encryptedPassword);

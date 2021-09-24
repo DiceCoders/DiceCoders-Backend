@@ -1,4 +1,4 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@modules/user/infra/typeorm/entities/user.entity';
 import { comparePassword } from '@shared/utils/password';
@@ -7,7 +7,6 @@ import { IUserService } from '@modules/user/interfaces';
 @Injectable()
 export class AuthService {
   constructor(
-    @Inject('UserService')
     private readonly userService: IUserService,
     private readonly jwtService: JwtService,
   ) {}

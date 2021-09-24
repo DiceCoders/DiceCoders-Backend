@@ -6,15 +6,15 @@ import {
   UserTokenDTO,
 } from '../Dto';
 
-export interface IUserService {
-  createUser(data: CreateUserDTO): Promise<User>;
-  getUser(
+export abstract class IUserService {
+  abstract createUser(data: CreateUserDTO): Promise<User>;
+  abstract getUser(
     data: { id?: string; email?: string },
     userTokenData: UserTokenDTO,
   ): Promise<User>;
-  updateUser(
+  abstract updateUser(
     updateUserData: UpdateUserDTO,
     userTokenData?: UserTokenDTO,
   ): Promise<string>;
-  deleteUser(data: DeleteUserDTO): Promise<boolean>;
+  abstract deleteUser(data: DeleteUserDTO): Promise<boolean>;
 }

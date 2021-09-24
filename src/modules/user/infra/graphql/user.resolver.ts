@@ -1,5 +1,5 @@
 import { Resolver, Args, Query, Mutation } from '@nestjs/graphql';
-import { Inject, UseGuards } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import { UserType, CreateUserInput, UpdateUserInput } from './types';
 import { GqlAuthGuard } from '@modules/auth/guards/gql-auth.guard';
 import { CurrentUser } from '@modules/auth/current-user.decorator';
@@ -8,10 +8,7 @@ import { IUserService } from '@modules/user/interfaces';
 
 @Resolver(() => UserType)
 export class UserResolver {
-  constructor(
-    @Inject('UserService')
-    private readonly userService: IUserService,
-  ) {}
+  constructor(private readonly userService: IUserService) {}
   @Query(() => UserType)
   @UseGuards(GqlAuthGuard)
   async user(
