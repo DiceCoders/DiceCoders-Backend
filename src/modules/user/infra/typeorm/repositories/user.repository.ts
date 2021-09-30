@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IUserRepository } from '@modules/user/interfaces/iUserRepository';
 import { User } from '../entities/user.entity';
-import { UpdateUserDTO } from '@modules/user/Dto';
+import { DeleteUserDTO, UpdateUserDTO } from '@modules/user/Dto';
 
 @Injectable()
 export class UserRepository implements IUserRepository {
@@ -30,7 +30,7 @@ export class UserRepository implements IUserRepository {
 
     return user;
   }
-  delete(id: string): Promise<DeleteResult> {
-    return this.ormRepository.delete(id);
+  delete(user: User): Promise<DeleteResult> {
+    return this.ormRepository.delete(user);
   }
 }

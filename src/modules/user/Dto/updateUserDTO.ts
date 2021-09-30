@@ -1,5 +1,9 @@
-import { CreateUserDTO } from '.';
-
-export class UpdateUserDTO extends CreateUserDTO {
+export class UpdateUserDTO {
   id: string;
+
+  email: string;
+
+  name: string;
+
+  password?: string;
 }

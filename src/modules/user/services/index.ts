@@ -25,35 +25,31 @@ export class UserService implements IUserService {
     const queryData = userTokenData
       ? { id: userTokenData.id, email: userTokenData.email }
       : data;
-
-    return this.userRepository.findOne(queryData);
+    const user = this.userRepository.findOne(queryData);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
   async updateUser(
     updateUserData: UpdateUserDTO,
     userTokenData: UserTokenDTO,
   ): Promise<string> {
     if (updateUserData.id !== userTokenData.id) {
-      throw new UnauthorizedException('Unauthorized user');
+      throw new UnauthorizedException('You cant update another  user');
     }
-    const user = await this.userRepository.findOne({ id: userTokenData.id });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+    const user = await this.getUser({ id: userTokenData.id });
 
     const data = Object.assign(user, updateUserData);
 
     await this.userRepository.update(data);
-    return 'Usuário atualizado';
+    return 'User updated';
   }
   async deleteUser(data: DeleteUserDTO): Promise<boolean> {
-    const user = await this.userRepository.findOne(data);
+    const user = await this.getUser(data);
 
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+    const { affected } = await this.userRepository.delete(user);
 
-    const deleteResult = await this.userRepository.delete(data.id);
-    return deleteResult.affected > 0;
+    return affected > 0;
   }
 }
